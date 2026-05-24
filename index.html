@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>创作者灵感加油站</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07080d;
+      --panel: rgba(13, 18, 32, .84);
+      --panel-2: rgba(18, 25, 44, .94);
+      --line: rgba(88, 255, 237, .2);
+      --text: #eef7ff;
+      --muted: #9daac0;
+      --cyan: #22f4ff;
+      --pink: #ff3df0;
+      --lime: #caff4d;
+      --red: #ff6678;
+      --shadow: 0 22px 80px rgba(0, 0, 0, .42);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: var(--text);
+      font-family: "Trebuchet MS", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        linear-gradient(rgba(34,244,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,61,240,.035) 1px, transparent 1px),
+        radial-gradient(circle at 10% 0%, rgba(34,244,255,.16), transparent 30rem),
+        radial-gradient(circle at 88% 8%, rgba(255,61,240,.13), transparent 28rem),
+        radial-gradient(circle at 50% 100%, rgba(202,255,77,.08), transparent 26rem),
+        var(--bg);
+      background-size: 38px 38px, 38px 38px, auto, auto, auto, auto;
+    }
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      content: "";
+      background: repeating-linear-gradient(to bottom, rgba(255,255,255,.04), rgba(255,255,255,.04) 1px, transparent 1px, transparent 7px);
+      opacity: .18;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { position: relative; z-index: 1; width: min(1220px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 36px; }
+    .hero, .panel, .footer-tools, .modal { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); backdrop-filter: blur(18px); }
+    .hero { position: relative; overflow: hidden; margin-bottom: 18px; padding: 24px; }
+    .hero::after { position: absolute; right: -22px; bottom: -32px; width: 250px; height: 130px; content: ""; border: 1px solid rgba(34,244,255,.25); transform: rotate(-8deg); }
+    .kicker { display: inline-flex; margin-bottom: 10px; color: var(--lime); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { max-width: 840px; margin-bottom: 12px; font-family: Georgia, "Times New Roman", "Songti SC", serif; font-size: clamp(34px, 6vw, 70px); line-height: .98; letter-spacing: 0; }
+    .hero p { max-width: 830px; margin-bottom: 18px; color: var(--muted); font-size: 16px; line-height: 1.75; }
+    .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; max-width: 900px; }
+    .step { min-height: 74px; padding: 12px; border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); background: rgba(255,255,255,.045); }
+    .step b { display: block; margin-bottom: 5px; color: var(--cyan); font-size: 14px; }
+    .step span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .main-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+    .panel { min-height: 510px; padding: 18px; }
+    .panel-head { display: flex; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+    .panel h2 { margin-bottom: 7px; font-size: 20px; }
+    .panel-head p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .tag { flex: 0 0 auto; height: 28px; padding: 5px 9px; border: 1px solid rgba(202,255,77,.35); border-radius: 999px; color: var(--lime); background: rgba(202,255,77,.07); font-size: 12px; white-space: nowrap; }
+    .form-grid { display: grid; gap: 12px; }
+    label { display: grid; gap: 7px; color: var(--muted); font-size: 13px; }
+    textarea, select { width: 100%; border: 1px solid rgba(255,255,255,.13); border-radius: var(--radius); color: var(--text); background: rgba(2, 5, 14, .75); outline: none; transition: border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+    textarea { min-height: 150px; padding: 12px; resize: vertical; line-height: 1.65; }
+    select { min-height: 42px; padding: 0 12px; }
+    textarea:focus, select:focus { border-color: rgba(34,244,255,.78); box-shadow: 0 0 0 3px rgba(34,244,255,.12); background: rgba(4, 10, 25, .94); }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 2px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 0 14px; border: 1px solid rgba(255,255,255,.14); border-radius: var(--radius); color: var(--text); background: rgba(255,255,255,.07); transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+    .btn:hover { transform: translateY(-1px); border-color: rgba(34,244,255,.55); box-shadow: 0 0 24px rgba(34,244,255,.12); }
+    .btn:disabled { cursor: not-allowed; opacity: .58; transform: none; box-shadow: none; }
+    .primary { border-color: rgba(34,244,255,.72); color: #031018; background: linear-gradient(135deg, var(--cyan), var(--lime)); font-weight: 800; }
+    .secondary { border-color: rgba(255,61,240,.58); background: rgba(255,61,240,.13); }
+    .ghost { min-height: 34px; padding: 0 10px; color: var(--muted); font-size: 13px; background: rgba(255,255,255,.04); }
+    .output-zone { margin-top: 16px; }
+    .empty { display: grid; min-height: 170px; place-items: center; padding: 22px; border: 1px dashed rgba(255,255,255,.16); border-radius: var(--radius); color: var(--muted); text-align: center; line-height: 1.7; background: rgba(255,255,255,.025); }
+    .title-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .title-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid rgba(255,255,255,.11); border-radius: var(--radius); background: linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.025)); }
+    .title-copy { min-width: 0; font-size: 15px; line-height: 1.65; overflow-wrap: anywhere; }
+    .feedback { display: flex; gap: 7px; }
+    .feedback .btn { min-height: 34px; padding: 0 9px; font-size: 12px; white-space: nowrap; }
+    .feedback .liked { border-color: rgba(202,255,77,.72); color: var(--lime); }
+    .feedback .disliked { border-color: rgba(255,102,120,.72); color: var(--red); }
+    .analysis-card { display: grid; gap: 10px; }
+    .analysis-section { padding: 13px; border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); background: rgba(255,255,255,.04); }
+    .analysis-section h3 { margin-bottom: 8px; color: var(--cyan); font-size: 14px; }
+    .analysis-section pre { margin: 0; color: #dce9fb; white-space: pre-wrap; word-break: break-word; font-family: inherit; line-height: 1.7; }
+    .loading { display: grid; gap: 10px; }
+    .skeleton { position: relative; overflow: hidden; height: 48px; border-radius: var(--radius); background: rgba(255,255,255,.075); }
+    .skeleton::after { position: absolute; inset: 0; content: ""; background: linear-gradient(90deg, transparent, rgba(34,244,255,.18), transparent); transform: translateX(-100%); animation: scan 1.15s infinite; }
+    @keyframes scan { to { transform: translateX(100%); } }
+    .footer-tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 18px; padding: 16px 18px; }
+    .footer-tools p { margin: 0; color: var(--muted); line-height: 1.55; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: none; place-items: center; padding: 18px; background: rgba(2, 4, 10, .72); backdrop-filter: blur(10px); }
+    .modal-backdrop.open { display: grid; }
+    .modal { width: min(680px, 100%); max-height: min(720px, calc(100vh - 40px)); overflow: auto; background: var(--panel-2); }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .modal-head h2 { margin: 0; font-size: 18px; }
+    .modal-body { padding: 18px; }
+    .rank-list { display: grid; gap: 10px; margin: 0 0 14px; padding: 0; list-style: none; }
+    .rank-list li { padding: 12px; border: 1px solid rgba(255,255,255,.1); border-radius: var(--radius); background: rgba(255,255,255,.045); line-height: 1.6; }
+    .rank-list b { color: var(--lime); }
+    .feature-summary { padding: 13px; border: 1px solid rgba(202,255,77,.24); border-radius: var(--radius); color: #efffd0; background: rgba(202,255,77,.06); line-height: 1.7; }
+    .toast { position: fixed; right: 18px; bottom: 18px; z-index: 40; width: min(390px, calc(100% - 36px)); padding: 13px 14px; border: 1px solid rgba(34,244,255,.34); border-radius: var(--radius); color: var(--text); background: rgba(9, 14, 26, .96); box-shadow: var(--shadow); transform: translateY(18px); opacity: 0; pointer-events: none; transition: opacity .18s ease, transform .18s ease; line-height: 1.55; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.error { border-color: rgba(255,102,120,.62); color: #ffe9ed; }
+    @media (max-width: 920px) { .main-grid, .steps { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .shell { width: min(100% - 20px, 1220px); padding-top: 14px; } .hero, .panel, .footer-tools { padding: 14px; } .panel-head { display: grid; } .title-item { grid-template-columns: 1fr; } .feedback { width: 100%; } .feedback .btn { flex: 1; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero" aria-label="应用介绍">
+      <span class="kicker">Creator Idea Station</span>
+      <h1>创作者灵感加油站</h1>
+      <p>一个帮抖音、小红书创作者快速生成爆款选题标题、拆解对标文案的夜间工作台。打开页面，填写内容就能用。</p>
+      <div class="steps">
+        <div class="step"><b>01 填写卖点</b><span>输入产品、内容或账号的核心卖点。</span></div>
+        <div class="step"><b>02 生成/分析</b><span>生成 10 个标题，或拆解一篇对标爆款。</span></div>
+        <div class="step"><b>03 反馈复盘</b><span>点赞/点踩标题，查看 24 小时内受欢迎特征。</span></div>
+      </div>
+    </section>
+    <section class="main-grid">
+      <article class="panel">
+        <div class="panel-head"><div><h2>爆款标题生成器</h2><p>输出 10 个标题，尽量包含钩子、数字和情绪词中的至少 2 类元素。</p></div><span class="tag">10 titles</span></div>
+        <div class="form-grid">
+          <label>产品/内容核心卖点<textarea id="productInput" placeholder="例：一款适合新手的低预算家庭收纳方案，30 分钟让出租屋变整洁"></textarea></label>
+          <label>内容类型<select id="categoryInput"><option value="">请选择内容类型</option><option>剧情</option><option>美妆</option><option>知识</option><option>穿搭</option><option>母婴</option><option>家居</option><option>职场</option><option>探店</option><option>其他</option></select></label>
+          <div class="actions"><button class="btn primary" id="generateBtn" type="button">生成爆款标题</button></div>
+        </div>
+        <div class="output-zone" id="titlesOutput"><div class="empty">生成结果会出现在这里。点一下 👍 或 👎，系统会自动记录到本地反馈日志。</div></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>爆款分析器</h2><p>粘贴完整文案，拆出结构、句式模板、优化点和仿写标题。</p></div><span class="tag">benchmark</span></div>
+        <div class="form-grid">
+          <label>对标爆款完整文案/脚本<textarea id="scriptInput" placeholder="把你想学习的爆款文案、口播稿、脚本完整粘贴到这里"></textarea></label>
+          <div class="actions"><button class="btn secondary" id="analyzeBtn" type="button">分析爆款结构</button></div>
+        </div>
+        <div class="output-zone" id="analysisOutput"><div class="empty">分析结果会按结构拆解、句式模板、优化建议和仿写标题分块展示。</div></div>
+      </article>
+    </section>
+    <section class="footer-tools"><p>本地反馈只存在当前浏览器里，适合每天复盘哪类标题更容易被你选中。</p><button class="btn primary" id="statsBtn" type="button">📊 查看今日最受欢迎的标题特征</button></section>
+  </main>
+  <div class="modal-backdrop" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsTitle"><div class="modal"><div class="modal-head"><h2 id="statsTitle">24 小时标题反馈</h2><button class="btn ghost" id="closeModalBtn" type="button" aria-label="关闭弹窗">关闭</button></div><div class="modal-body" id="statsBody"></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="config.js"></script>
+  <script>
+    // 读取本地 config.js 或部署环境注入的运行时配置，避免在仓库中提交真实密钥。
+    const RUNTIME_CONFIG = window.CREATOR_STATION_CONFIG || {};
+    const API_BASE_URL = RUNTIME_CONFIG.API_BASE_URL || "";
+    const API_KEY = RUNTIME_CONFIG.API_KEY || "";
+    const MODEL_FALLBACKS = Array.isArray(RUNTIME_CONFIG.MODEL_FALLBACKS) && RUNTIME_CONFIG.MODEL_FALLBACKS.length
+      ? RUNTIME_CONFIG.MODEL_FALLBACKS
+      : ["deepseek-v4-flash", "deepseek-v4-pro", "qwen3.6-plus"];
+    const MODEL_TIMEOUT_MS = 35000;
+    const TITLE_SYSTEM_PROMPT = `你是一个拥有 500 万粉丝的抖音/小红书爆款内容策划专家。用户会给你【产品卖点】和【内容类型】。你需要生成 10 个标题。每个标题必须包含以下至少 2 个要素：黄金前 5 秒钩子（反常识/悬念/痛点/利益点）、数字/数据、情绪词。不要解释，直接输出 10 个标题，每行一个。`;
+    const ANALYSIS_SYSTEM_PROMPT = `你是一个专业的抖音/小红书内容分析师。用户会给你一篇爆款文案。请严格按以下格式输出，不要添加额外解释：
+
+爆款结构拆解：
+（开头钩子类型：______ ；中间逻辑：______ ；结尾引导：______）
+
+可复用的句式模板：
+（例如：你绝对不知道 + X + 竟然 + Y）
+
+建议优化的点：
+1. 
+2. 
+
+仿写标题（3个）：
+1.
+2.
+3.`;
+    const FEEDBACK_KEY = "creatorStationFeedbackLogs";
+    const generateBtn = document.getElementById("generateBtn");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const productInput = document.getElementById("productInput");
+    const categoryInput = document.getElementById("categoryInput");
+    const scriptInput = document.getElementById("scriptInput");
+    const titlesOutput = document.getElementById("titlesOutput");
+    const analysisOutput = document.getElementById("analysisOutput");
+    const statsBtn = document.getElementById("statsBtn");
+    const statsModal = document.getElementById("statsModal");
+    const statsBody = document.getElementById("statsBody");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const toast = document.getElementById("toast");
+    async function callChatApi(systemPrompt, userPrompt) {
+      if (!API_BASE_URL || !API_KEY) {
+        throw new Error("AI 服务未完成配置，请先按 README 完成本地配置。");
+      }
+      const endpoint = `${API_BASE_URL.replace(/\/+$/, "")}/v1/chat/completions`;
+      const errors = [];
+      for (const model of MODEL_FALLBACKS) {
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
+        try {
+          const response = await fetch(endpoint, {
+            method: "POST",
+            signal: controller.signal,
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
+            body: JSON.stringify({ model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }], temperature: 0.82 })
+          });
+          window.clearTimeout(timeout);
+          const raw = await response.text();
+          const data = safeJsonParse(raw, null);
+          if (response.ok) {
+            const content = data?.choices?.[0]?.message?.content || raw || "";
+            if (model !== MODEL_FALLBACKS[0]) showToast(`主服务繁忙，已自动切换备用模型。`);
+            return content;
+          }
+          const message = data?.error?.message || raw || "";
+          errors.push({ model, status: response.status, message });
+          if (response.status === 401 || /invalid token|unauthorized/i.test(message)) break;
+        } catch (error) {
+          window.clearTimeout(timeout);
+          errors.push({ model, status: 0, message: error.name === "AbortError" ? "request timeout" : error.message });
+        }
+      }
+      if (errors.some(error => error.status === 401 || /invalid token|unauthorized/i.test(error.message))) {
+        throw new Error("AI 服务暂时不可用，请联系管理员检查服务配置。");
+      }
+      if (errors.some(error => error.status === 503 || /cpu overloaded|overloaded|service unavailable/i.test(error.message))) {
+        throw new Error("AI 服务当前繁忙，请稍后再试。");
+      }
+      throw new Error("AI 服务暂时不可用，请稍后再试。");
+    }
+    function safeJsonParse(value, fallback) { try { return JSON.parse(value); } catch (error) { return fallback; } }
+    function setLoading(target, lines = 4) { target.innerHTML = `<div class="loading" aria-label="加载中">${Array.from({ length: lines }, () => `<div class="skeleton"></div>`).join("")}</div>`; }
+    function showToast(message, isError = false) { toast.textContent = message; toast.classList.toggle("error", isError); toast.classList.add("show"); window.clearTimeout(showToast.timer); showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 3000); }
+    function escapeHtml(value) { return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+    function extractTitles(text) { return text.split(/\n+/).map(line => line.replace(/^\s*(?:\d+[\.\、\)]|[-*•])\s*/, "").trim()).filter(Boolean).slice(0, 10); }
+    async function generateTitles() {
+      const product = productInput.value.trim();
+      const category = categoryInput.value.trim();
+      if (!product || !category) { showToast("请填写产品/内容核心卖点，并选择内容类型。", true); return; }
+      setLoading(titlesOutput, 5);
+      generateBtn.disabled = true;
+      try {
+        const userPrompt = `产品卖点：${product}\n内容类型：${category}\n请生成 10 个标题。`;
+        const text = await callChatApi(TITLE_SYSTEM_PROMPT, userPrompt);
+        const titles = extractTitles(text);
+        renderTitles(titles.length ? titles : [text.trim()]);
+      } catch (error) {
+        titlesOutput.innerHTML = `<div class="empty">${escapeHtml(error.message || "AI 服务暂时不可用，请稍后再试。")}</div>`;
+        showToast(error.message || "AI 服务暂时不可用，请稍后再试。", true);
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+    function renderTitles(titles) {
+      titlesOutput.innerHTML = `<ul class="title-list">${titles.map((title, index) => `<li class="title-item"><div class="title-copy">${escapeHtml(title)}</div><div class="feedback"><button class="btn" data-title-index="${index}" data-feedback="like" type="button">👍 有用</button><button class="btn" data-title-index="${index}" data-feedback="dislike" type="button">👎 没用</button></div></li>`).join("")}</ul>`;
+      titlesOutput.querySelectorAll("[data-feedback]").forEach(button => {
+        button.addEventListener("click", () => {
+          const title = titles[Number(button.dataset.titleIndex)];
+          recordFeedback(title, button.dataset.feedback);
+          button.parentElement.querySelectorAll(".btn").forEach(item => item.classList.remove("liked", "disliked"));
+          button.classList.add(button.dataset.feedback === "like" ? "liked" : "disliked");
+        });
+      });
+    }
+    async function analyzeScript() {
+      const script = scriptInput.value.trim();
+      if (!script) { showToast("请先粘贴一篇对标爆款文案。", true); return; }
+      setLoading(analysisOutput, 4);
+      analyzeBtn.disabled = true;
+      try {
+        const text = await callChatApi(ANALYSIS_SYSTEM_PROMPT, script);
+        renderAnalysis(text);
+      } catch (error) {
+        analysisOutput.innerHTML = `<div class="empty">${escapeHtml(error.message || "AI 服务暂时不可用，请稍后再试。")}</div>`;
+        showToast(error.message || "AI 服务暂时不可用，请稍后再试。", true);
+      } finally {
+        analyzeBtn.disabled = false;
+      }
+    }
+    function renderAnalysis(text) {
+      const sections = [["爆款结构拆解", captureSection(text, "爆款结构拆解：", "可复用的句式模板：")], ["可复用的句式模板", captureSection(text, "可复用的句式模板：", "建议优化的点：")], ["建议优化的点", captureSection(text, "建议优化的点：", "仿写标题（3个）：")], ["仿写标题（3个）", captureSection(text, "仿写标题（3个）：", null)]];
+      if (!sections.some(([, content]) => content)) { analysisOutput.innerHTML = `<div class="analysis-card"><div class="analysis-section"><h3>分析结果</h3><pre>${escapeHtml(text)}</pre></div></div>`; return; }
+      analysisOutput.innerHTML = `<div class="analysis-card">${sections.map(([title, content]) => `<section class="analysis-section"><h3>${title}</h3><pre>${escapeHtml(content || "暂无内容")}</pre></section>`).join("")}</div>`;
+    }
+    function captureSection(text, start, end) { const startIndex = text.indexOf(start); if (startIndex === -1) return ""; const contentStart = startIndex + start.length; const endIndex = end ? text.indexOf(end, contentStart) : -1; return text.slice(contentStart, endIndex === -1 ? text.length : endIndex).trim(); }
+    function getFeedbackLogs() { const logs = safeJsonParse(localStorage.getItem(FEEDBACK_KEY), []); return Array.isArray(logs) ? logs : []; }
+    function recordFeedback(title, feedback) { const logs = getFeedbackLogs(); logs.push({ title, feedback, createdAt: Date.now() }); localStorage.setItem(FEEDBACK_KEY, JSON.stringify(logs)); showToast(feedback === "like" ? "已记录：这个标题有用。" : "已记录：这个标题没用。"); }
+    function openStats() { statsBody.innerHTML = buildStatsHtml(); statsModal.classList.add("open"); }
+    function closeStats() { statsModal.classList.remove("open"); }
+    function buildStatsHtml() {
+      const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      const likes = getFeedbackLogs().filter(log => log.feedback === "like" && log.createdAt >= dayAgo);
+      if (!likes.length) return `<div class="empty">过去 24 小时还没有点赞记录。先给几个标题点 👍，这里就会出现复盘结果。</div>`;
+      const countMap = new Map();
+      likes.forEach(log => countMap.set(log.title, (countMap.get(log.title) || 0) + 1));
+      const topTitles = [...countMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+      return `<ol class="rank-list">${topTitles.map(([title, count], index) => `<li><b>#${index + 1} · ${count} 次点赞</b><br>${escapeHtml(title)}</li>`).join("")}</ol><div class="feature-summary">${escapeHtml(summarizeFeatures(topTitles.map(([title]) => title)))}</div>`;
+    }
+    function summarizeFeatures(titles) {
+      const joined = titles.join(" ");
+      const features = [];
+      if (/\d|一|二|三|四|五|六|七|八|九|十|百|千|万/.test(joined)) features.push("数字/步骤感");
+      if (/省钱|省下|便宜|低预算|平价|避坑/.test(joined)) features.push("省钱或避坑利益点");
+      if (/崩溃|震惊|离谱|太牛|绝了|千万别|后悔|救命/.test(joined)) features.push("强情绪词");
+      if (/不知道|没人说|原来|竟然|秘密|真相/.test(joined)) features.push("悬念或反常识钩子");
+      if (/方法|技巧|步骤|清单|模板|公式/.test(joined)) features.push("可执行结构");
+      if (/新手|普通人|小白|打工人|学生党/.test(joined)) features.push("明确人群标签");
+      if (!features.length) return "这些标题暂时没有明显的共同关键词。可以继续多点几个 👍，样本变多后趋势会更清楚。";
+      return `发现过去 24 小时被点赞的标题更集中在：${features.slice(0, 4).join("、")}。后续可以优先测试带这些结构的标题。`;
+    }
+    generateBtn.addEventListener("click", generateTitles);
+    analyzeBtn.addEventListener("click", analyzeScript);
+    statsBtn.addEventListener("click", openStats);
+    closeModalBtn.addEventListener("click", closeStats);
+    statsModal.addEventListener("click", event => { if (event.target === statsModal) closeStats(); });
+    document.addEventListener("keydown", event => { if (event.key === "Escape") closeStats(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "creator-inspiration-station",
+  "version": "1.0.0",
+  "private": false,
+  "description": "AI-powered topic, title, and benchmark analysis workspace for short-form content creators.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "creator-tools",
+    "content-marketing",
+    "ai-writing",
+    "short-video",
+    "xiaohongshu",
+    "douyin"
+  ],
+  "license": "MIT"
+}
