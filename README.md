@@ -80,8 +80,7 @@
 当前版本是纯前端单页应用：
 
 - `index.html`：页面结构、样式和交互逻辑。
-- `config.js`：本地运行时配置文件，不提交到仓库。
-- `server.js`：可选本地静态服务，会根据环境变量输出运行时配置。
+- `server.js`：静态页面服务 + AI 请求代理，从环境变量读取模型服务配置。
 - `localStorage`：存储标题反馈日志。
 - OpenAI-compatible API：调用兼容 Chat Completions 的模型服务。
 
@@ -89,47 +88,21 @@
 
 ## 配置说明
 
-项目不会在仓库中保存真实密钥。请复制配置示例创建本地配置：
+项目不会在仓库中保存真实密钥。运行时由 `server.js` 从环境变量读取模型服务配置，浏览器不会看到真实密钥。
 
-```bash
-cp config.example.js config.js
+参考 `.env.example`，在本地或部署平台中配置同名环境变量：
+
+```txt
+AI_API_BASE_URL=https://your-openai-compatible-endpoint.example.com
+AI_API_KEY=your-api-key
+AI_MODEL_FALLBACKS=model-a,model-b
 ```
 
-然后在 `config.js` 中填入自己的服务地址、密钥和模型列表：
-
-```js
-window.CREATOR_STATION_CONFIG = {
-  API_BASE_URL: "https://your-openai-compatible-endpoint.example.com",
-  API_KEY: "your-api-key",
-  MODEL_FALLBACKS: ["model-a", "model-b"]
-};
-```
-
-也可以参考 `.env.example`，在部署平台中配置同名环境变量，并在构建或部署阶段注入到运行时配置里。
-
-> 注意：如果直接把静态页面部署到公网，不建议把真实密钥写进前端文件。更安全的方式是使用后端代理，由后端读取环境变量并转发请求。
+> 注意：不要把真实密钥写入 `index.html`、`config.example.js` 或 README。生产环境建议始终使用服务端代理。
 
 ## 本地运行
 
-方式一：直接打开文件。
-
-```bash
-open index.html
-```
-
-方式二：使用本地静态服务。
-
-```bash
-python3 -m http.server 8080
-```
-
-然后访问：
-
-```txt
-http://localhost:8080
-```
-
-方式三：使用内置 Node 服务，并从环境变量读取配置。
+方式一：使用内置 Node 服务。
 
 ```bash
 AI_API_BASE_URL="https://your-openai-compatible-endpoint.example.com" \
@@ -144,6 +117,32 @@ npm start
 http://localhost:3000
 ```
 
+方式二：只预览 UI。
+
+```bash
+open index.html
+```
+
+直接打开文件可以预览界面，但 AI 请求需要通过 `npm start` 或部署后的后端代理运行。
+
+## Render 部署
+
+Render Web Service 推荐配置：
+
+```txt
+Root Directory: 留空
+Build Command: npm install
+Start Command: npm start
+```
+
+环境变量：
+
+```txt
+AI_API_BASE_URL=https://your-openai-compatible-endpoint.example.com
+AI_API_KEY=your-api-key
+AI_MODEL_FALLBACKS=model-a,model-b
+```
+
 ## 部署到公网
 
 ### 静态部署
@@ -152,9 +151,9 @@ http://localhost:3000
 
 静态部署时需要注意：
 
-- 不要提交真实 `config.js`。
-- 使用平台环境变量生成运行时配置。
-- 或者将 AI 请求改为后端代理接口。
+- 不要把真实密钥提交到仓库。
+- 如果使用纯静态托管，需要另外提供后端代理接口。
+- 如果使用 Render / Railway / Fly.io 等 Web Service，可以直接使用本项目的 `server.js`。
 
 ### 推荐的后端代理方式
 
@@ -164,7 +163,7 @@ http://localhost:3000
 前端页面 -> 自己的后端代理 -> OpenAI-compatible 模型服务
 ```
 
-这样真实密钥只存在服务端环境变量中，前端只请求自己的业务接口。
+本项目已经内置这个代理结构，前端只请求 `/api/chat`，真实密钥只存在服务端环境变量中。
 
 ## 当前版本边界
 

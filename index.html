@@ -150,16 +150,8 @@
   </main>
   <div class="modal-backdrop" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsTitle"><div class="modal"><div class="modal-head"><h2 id="statsTitle">24 小时标题反馈</h2><button class="btn ghost" id="closeModalBtn" type="button" aria-label="关闭弹窗">关闭</button></div><div class="modal-body" id="statsBody"></div></div></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="config.js"></script>
   <script>
-    // 读取本地 config.js 或部署环境注入的运行时配置，避免在仓库中提交真实密钥。
-    const RUNTIME_CONFIG = window.CREATOR_STATION_CONFIG || {};
-    const API_BASE_URL = RUNTIME_CONFIG.API_BASE_URL || "";
-    const API_KEY = RUNTIME_CONFIG.API_KEY || "";
-    const MODEL_FALLBACKS = Array.isArray(RUNTIME_CONFIG.MODEL_FALLBACKS) && RUNTIME_CONFIG.MODEL_FALLBACKS.length
-      ? RUNTIME_CONFIG.MODEL_FALLBACKS
-      : ["deepseek-v4-flash", "deepseek-v4-pro", "qwen3.6-plus"];
-    const MODEL_TIMEOUT_MS = 35000;
+    // AI 请求走同源后端代理，真实密钥只保存在服务端环境变量中。
     const TITLE_SYSTEM_PROMPT = `你是一个拥有 500 万粉丝的抖音/小红书爆款内容策划专家。用户会给你【产品卖点】和【内容类型】。你需要生成 10 个标题。每个标题必须包含以下至少 2 个要素：黄金前 5 秒钩子（反常识/悬念/痛点/利益点）、数字/数据、情绪词。不要解释，直接输出 10 个标题，每行一个。`;
     const ANALYSIS_SYSTEM_PROMPT = `你是一个专业的抖音/小红书内容分析师。用户会给你一篇爆款文案。请严格按以下格式输出，不要添加额外解释：
 
@@ -191,44 +183,16 @@
     const closeModalBtn = document.getElementById("closeModalBtn");
     const toast = document.getElementById("toast");
     async function callChatApi(systemPrompt, userPrompt) {
-      if (!API_BASE_URL || !API_KEY) {
-        throw new Error("AI 服务未完成配置，请先按 README 完成本地配置。");
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ systemPrompt, userPrompt })
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(data?.error || "AI 服务暂时不可用，请稍后再试。");
       }
-      const endpoint = `${API_BASE_URL.replace(/\/+$/, "")}/v1/chat/completions`;
-      const errors = [];
-      for (const model of MODEL_FALLBACKS) {
-        const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
-        try {
-          const response = await fetch(endpoint, {
-            method: "POST",
-            signal: controller.signal,
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
-            body: JSON.stringify({ model, messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }], temperature: 0.82 })
-          });
-          window.clearTimeout(timeout);
-          const raw = await response.text();
-          const data = safeJsonParse(raw, null);
-          if (response.ok) {
-            const content = data?.choices?.[0]?.message?.content || raw || "";
-            if (model !== MODEL_FALLBACKS[0]) showToast(`主服务繁忙，已自动切换备用模型。`);
-            return content;
-          }
-          const message = data?.error?.message || raw || "";
-          errors.push({ model, status: response.status, message });
-          if (response.status === 401 || /invalid token|unauthorized/i.test(message)) break;
-        } catch (error) {
-          window.clearTimeout(timeout);
-          errors.push({ model, status: 0, message: error.name === "AbortError" ? "request timeout" : error.message });
-        }
-      }
-      if (errors.some(error => error.status === 401 || /invalid token|unauthorized/i.test(error.message))) {
-        throw new Error("AI 服务暂时不可用，请联系管理员检查服务配置。");
-      }
-      if (errors.some(error => error.status === 503 || /cpu overloaded|overloaded|service unavailable/i.test(error.message))) {
-        throw new Error("AI 服务当前繁忙，请稍后再试。");
-      }
-      throw new Error("AI 服务暂时不可用，请稍后再试。");
+      return data?.content || "";
     }
     function safeJsonParse(value, fallback) { try { return JSON.parse(value); } catch (error) { return fallback; } }
     function setLoading(target, lines = 4) { target.innerHTML = `<div class="loading" aria-label="加载中">${Array.from({ length: lines }, () => `<div class="skeleton"></div>`).join("")}</div>`; }
